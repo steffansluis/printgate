@@ -67,12 +67,20 @@ def review(scad: Path, out: Path, analyzer: MeshAnalyzer, *, base: Path | None =
     report.links["Open the STL"] = stl
 
     for printer in printers:
+        if (f := mesh.fits(report.metrics, printer.profile)) is not None:
+            report.findings.append(Finding(f.check, f.severity, f.message, {"printer": printer.name}))
+            continue
         if printer.slicer is None:
             continue
         slicer = plugins.load("printgate.adapters", printer.slicer)(printer.slicer_config,
                                                                     printer.center)
-        sliced = preflight(slicer.slice(stl, out / f"{printer.name}.gcode"), printer.profile,
-                           parts, printer.filament_density)
+        # Settings that travel with the model, in this slicer's own format.
+        own = scad.with_suffix(f".{printer.slicer}.ini")
+        overrides = (own,) if own.exists() else ()
+        if overrides:
+            report.attachments[f"Slicer settings from {own.name}"] = own.read_text().strip()
+        gcode = slicer.slice(stl, out / f"{printer.name}.gcode", overrides)
+        sliced = preflight(gcode, printer.profile, parts, printer.filament_density)
         report.metrics |= {f"{printer.name}: {k}": v for k, v in sliced.metrics.items()}
         report.findings += [Finding(f.check, f.severity, f.message, f.data | {"printer": printer.name})
                             for f in sliced.findings]

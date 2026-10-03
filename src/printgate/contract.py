@@ -59,8 +59,9 @@ class MeshAnalyzer(Protocol):
 
 @runtime_checkable
 class Slicer(Protocol):
-    # Constructed as Slicer(slicer_config, center) from a configured printer.
-    def slice(self, stl: Path, gcode: Path) -> Path: ...
+    # Constructed as Slicer(slicer_config, center) from a configured printer. `overrides` are
+    # settings that travel with one model, applied after the printer's.
+    def slice(self, stl: Path, gcode: Path, overrides: tuple[Path, ...] = ()) -> Path: ...
 
 
 @runtime_checkable

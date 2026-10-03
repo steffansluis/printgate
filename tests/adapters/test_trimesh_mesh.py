@@ -21,3 +21,12 @@ def test_flat_ceiling_counts_as_overhang(tmp_path):
                                       trimesh.creation.box((20, 20, 2)).apply_translation((0, 0, 6))])
     table.export(stl)
     assert TrimeshAnalyzer().analyze(stl)["Overhang >45° (mm²)"] > 300
+
+
+def test_wall_thickness_and_bodies(tmp_path):
+    stl = tmp_path / "two.stl"
+    trimesh.util.concatenate([trimesh.creation.box((20, 20, 1.2)),
+                              trimesh.creation.box((5, 5, 5)).apply_translation((30, 0, 0))]).export(stl)
+    m = TrimeshAnalyzer().analyze(stl)
+    assert m["Thinnest wall (mm)"] == pytest.approx(1.2, abs=0.05)
+    assert m["Bodies"] == 2

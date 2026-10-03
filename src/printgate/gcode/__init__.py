@@ -17,7 +17,9 @@ def preflight(path: Path | str, profile: Profile | None = None, parts: int | Non
         metrics["Print time (min)"] = tp.estimates["seconds"] / 60
     if "filament_cm3" in tp.estimates:
         metrics["Filament (cm³)"] = tp.estimates["filament_cm3"]
-        if filament_density:
+        if "filament_g" in tp.estimates:
+            metrics["Filament (g)"] = tp.estimates["filament_g"]
+        elif filament_density:
             metrics["Filament (g)"] = tp.estimates["filament_cm3"] * filament_density
     return Report(subject=str(path), findings=checks.run(tp, profile or Profile(), parts),
                   metrics=metrics)

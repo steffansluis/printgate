@@ -11,7 +11,7 @@ Found the way coverage or pytest find theirs, first match wins:
     slicer = "prusaslicer"                    # an adapter name
     slicer_config = "profiles/pla.ini"        # relative to the config file
     center = [110, 110]
-    filament_density = 1.24                   # g/cm³, turns filament volume into grams
+    filament_density = 1.24                   # g/cm³, when the slicer reports no grams itself
 
     [review]
     context = { mode = "assembly" }           # an extra view, for models that declare `mode`

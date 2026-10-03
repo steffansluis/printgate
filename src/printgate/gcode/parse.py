@@ -13,6 +13,7 @@ WORD = re.compile(r"([A-Z])(-?\d*\.?\d+)")
 # Slicer estimates: PrusaSlicer and OrcaSlicer write the first two, Cura the last.
 EST_TIME = re.compile(r"^; estimated printing time \(normal mode\) = (.+)$", re.M)
 EST_CM3 = re.compile(r"^; filament used \[cm3\] = ([\d.]+)", re.M)
+EST_G = re.compile(r"^; total filament used \[g\] = ([\d.]+)", re.M)
 CURA_TIME = re.compile(r"^;TIME:(\d+)", re.M)
 MOVE = re.compile(r"(G[01])(?![0-9])", re.I)
 DURATION = re.compile(r"(\d+)\s*([dhms])")
@@ -64,6 +65,8 @@ def estimates(text: str) -> dict[str, float]:
         out["seconds"] = float(m[1])
     if m := EST_CM3.search(text):
         out["filament_cm3"] = float(m[1])
+    if (m := EST_G.search(text)) and float(m[1]) > 0:    # 0 when the config sets no density
+        out["filament_g"] = float(m[1])
     return out
 
 

@@ -21,6 +21,7 @@ class Profile:
     cantilever_jump: float = 2.5          # layer area over the one below, within the first 12
     top_heavy_ratio: float = 3.0          # largest layer area over the first layer's
     min_first_z: float = 0.1              # a first extrusion lower than this drags on the plate
+    min_wall_mm: float = 0.9              # two extrusion widths at a 0.4 mm nozzle
     require_leveling: bool = False        # warn when no mesh is probed or loaded
     fast_layer_s: float = 10.0
     warp_small_mm2: float = 1500.0        # warp only blocks parts with a smaller footprint

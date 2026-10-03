@@ -16,7 +16,10 @@ class FakeAPI:
 
 
 def test_edits_the_comment_with_the_same_marker(monkeypatch):
-    api = FakeAPI([{"id": 1, "body": "unrelated"}, {"id": 7, "body": "<!-- pg -->\nold"}])
+    bot = {"type": "Bot"}
+    api = FakeAPI([{"id": 1, "body": "unrelated", "user": bot},
+                   {"id": 3, "body": "<!-- pg -->\nquoted by a person", "user": {"type": "User"}},
+                   {"id": 7, "body": "<!-- pg -->\nold", "user": bot}])
     monkeypatch.setattr(github, "_call", api)
     url = github.upsert_comment("o/r", 3, "<!-- pg -->\nnew", "t")
     assert url.startswith("PATCH") and url.endswith("/issues/comments/7")
@@ -32,3 +35,15 @@ def test_posts_when_no_earlier_comment_exists_past_the_first_page(monkeypatch):
 def test_a_report_without_a_marker_is_refused():
     with pytest.raises(ValueError, match="marker"):
         github.upsert_comment("o/r", 3, "no marker", "t")
+
+
+def test_http_errors_become_readable(monkeypatch):
+    import urllib.error
+    import urllib.request
+
+    def refuse(*a, **kw):
+        raise urllib.error.HTTPError("u", 403, "Forbidden", {}, None)
+
+    monkeypatch.setattr(urllib.request, "urlopen", refuse)
+    with pytest.raises(RuntimeError, match="403.*fork"):
+        github.upsert_comment("o/r", 3, "<!-- pg -->\nnew", "t")

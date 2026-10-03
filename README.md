@@ -19,7 +19,7 @@ entry point, so another package can add its own.
 ## Use
 
 ```
-pip install "printgate[mesh]"
+pip install "printgate[mesh]"   # trimesh, numpy, rtree
 printgate gcode plate.gcode --parts 4 --printer my-printer
 printgate review models/*.scad --base-root ../base --context mode=assembly --output review.md
 printgate comment review.md --pr 12     # in CI: edits the earlier report comment, or posts one
@@ -41,6 +41,10 @@ slicer_config = "profiles/pla.ini"       # relative to this file
 center = [110, 110]
 filament_density = 1.24
 ```
+
+Settings one model needs (a material, solid infill) travel with it as `<model>.<slicer>.ini`
+beside the model, e.g. `bracket.prusaslicer.ini`, loaded after the printer's slicer config and
+shown in the review.
 
 `PRINTGATE_PRINTERS=a,b` narrows a run to those printers; `printgate config` shows what is in
 effect. `printgate gcode --printer my-printer` judges against that printer's profile, and
