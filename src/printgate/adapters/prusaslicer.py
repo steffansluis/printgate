@@ -14,9 +14,9 @@ class PrusaSlicer:
         self.cmd = shlex.split(os.environ.get("PRINTGATE_PRUSASLICER", "prusa-slicer"))
 
     def slice(self, stl: Path, gcode: Path) -> Path:
-        args = [*self.cmd, "--load", str(self.config), "--export-gcode", str(stl), "--output", str(gcode)]
-        if self.center:
-            args[1:1] = ["--center", "{},{}".format(*self.center)]
+        center = ["--center", "{},{}".format(*self.center)] if self.center else []
+        args = [*self.cmd, *center, "--load", str(self.config), "--export-gcode", str(stl),
+                "--output", str(gcode)]
         try:
             r = subprocess.run(args, capture_output=True, text=True, timeout=900)
         except FileNotFoundError:
