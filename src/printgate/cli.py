@@ -1,10 +1,12 @@
 """printgate gcode FILE...   judge sliced G-code (exit 1 when anything blocks)
 printgate review SCAD...  render, measure and picture models for a review comment
+printgate comment FILE    post it to a pull request, editing the earlier one in place
 """
 from __future__ import annotations
 
 import argparse
 import inspect
+import os
 import sys
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -59,8 +61,20 @@ def main(argv=None) -> int:
 
     sub.add_parser("config", parents=[common], help="show the configuration in effect")
 
+    c = sub.add_parser("comment", help="post a report to a pull request, editing the earlier one")
+    c.add_argument("report", type=Path)
+    c.add_argument("--repo", default=os.environ.get("GITHUB_REPOSITORY"), help="owner/name")
+    c.add_argument("--pr", type=int, required=True)
+
     a = ap.parse_args(argv)
     try:
+        if a.cmd == "comment":
+            from .adapters.github import upsert_comment
+            token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+            if not (token and a.repo):
+                raise ValueError("needs GITHUB_TOKEN (or GH_TOKEN) and --repo or GITHUB_REPOSITORY")
+            print(upsert_comment(a.repo, a.pr, a.report.read_text(), token))
+            return 0
         cfg = configuration.load(a.config)
         profile = Profile.load(a.profile) if a.profile else None
         if a.cmd == "config":

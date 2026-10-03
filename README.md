@@ -22,6 +22,7 @@ entry point, so another package can add its own.
 pip install "printgate[mesh]"
 printgate gcode plate.gcode --parts 4 --printer my-printer
 printgate review models/*.scad --base-root ../base --context mode=assembly --output review.md
+printgate comment review.md --pr 12     # in CI: edits the earlier report comment, or posts one
 ```
 
 ## Configure
