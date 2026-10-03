@@ -18,6 +18,7 @@ class Profile:
     bed_max: tuple[float, float, float] = (220.0, 220.0, 250.0)
     firmware: str = "generic"
     min_first_layer_mm2: float = 500.0    # below this a part detaches more often than not
+    min_island_mm2: float = 250.0         # each separate part's own footprint, brim included
     cantilever_jump: float = 2.5          # layer area over the one below, within the first 12
     top_heavy_ratio: float = 3.0          # largest layer area over the first layer's
     min_first_z: float = 0.1              # a first extrusion lower than this drags on the plate

@@ -177,3 +177,18 @@ def test_unmarked_file_counts_islands_on_the_first_layer_only(tmp_path):
     g = "G28\nG1 Z0.3\n" + "\n".join(square(100, 100, 30)) + "\nG1 Z0.6\n" + \
         "\n".join(square(100, 100, 30)) + "\n" + "\n".join(square(160, 100, 30)) + "\n"
     assert "fusion" not in blocks(tmp_path, g, parts=1)
+
+
+def test_a_small_part_beside_a_large_one_blocks(tmp_path):
+    big = square(100, 100, 30)
+    small = square(150, 100, 6, e0=10)
+    g = "M104 S210\nM140 S60\nG28\n;LAYER_CHANGE\nG1 Z0.28\n" + "\n".join(big + small) + "\n"
+    assert "island-footprint" in blocks(tmp_path, g, parts=2)
+    assert "first-layer" not in blocks(tmp_path, g, parts=2)
+
+
+def test_a_brimmed_small_part_passes(tmp_path):
+    brimmed = square(150, 100, 17, e0=10)
+    g = "M104 S210\nM140 S60\nG28\n;LAYER_CHANGE\nG1 Z0.28\n" + "\n".join(
+        square(100, 100, 30) + brimmed) + "\n"
+    assert "island-footprint" not in blocks(tmp_path, g, parts=2)

@@ -129,6 +129,16 @@ def shape(tp: Toolpath, p: Profile, parts) -> list[Finding]:
     if base > 0 and top / base >= p.top_heavy_ratio:
         out.append(Finding("top-heavy", W, f"largest layer is {top / base:.1f}× the first: "
                                            f"put the largest face on the bed"))
+    # The bounding box above spans the whole plate, so a small part beside a large one passes it;
+    # each island must hold the bed on its own footprint.
+    for comp in components(raster(tp.layers[0].segments, p.raster_mm)):
+        xs, ys = [c[0] for c in comp], [c[1] for c in comp]
+        area = (max(xs) - min(xs) + 1) * (max(ys) - min(ys) + 1) * p.raster_mm ** 2
+        if area < p.min_island_mm2:
+            out.append(Finding("island-footprint", B, f"a part covers only {area:.0f} mm² of the first "
+                               f"layer (< {p.min_island_mm2:.0f}): brim it, or print it with one",
+                               {"area_mm2": area}))
+            break
     if parts is not None and n < parts:
         out.append(Finding("fusion", B, f"expected {parts} parts but the first layer has {n} "
                                         f"island(s): footprints or brims have merged"))
