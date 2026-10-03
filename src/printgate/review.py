@@ -29,7 +29,7 @@ def parameters(scad: Path) -> list[tuple[str, str, str]]:
 def review(scad: Path, out: Path, analyzer: MeshAnalyzer, *, base: Path | None = None,
            profile: Profile | None = None, printers: tuple[Printer, ...] = (), parts: int = 1,
            differ: Differ | None = None, context: dict | None = None,
-           subject: str | None = None) -> Report:
+           views: dict | None = None, subject: str | None = None) -> Report:
     profile = profile or (printers[0].profile if printers else Profile())
     out.mkdir(parents=True, exist_ok=True)
     report = Report(subject=subject or str(scad), parameters=parameters(scad))
@@ -64,6 +64,10 @@ def review(scad: Path, out: Path, analyzer: MeshAnalyzer, *, base: Path | None =
     if context and openscad.image(scad, out / "context.png", SECTION, context).ok:
         label = ", ".join(f"{k}={v}" for k, v in context.items())
         report.images.append(Image("context", f"in context ({label})", out / "context.png"))
+    for name, overrides in (views or {}).items():
+        if set(overrides) <= declared and openscad.image(scad, out / f"view-{name}.png",
+                                                         VIEWS[0][1], overrides).ok:
+            report.images.append(Image(f"view-{name}", name, out / f"view-{name}.png"))
     report.links["Open the STL"] = stl
 
     for printer in printers:

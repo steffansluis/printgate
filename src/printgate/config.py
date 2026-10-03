@@ -16,6 +16,10 @@ Found the way coverage or pytest find theirs, first match wins:
     [review]
     context = { mode = "assembly" }           # an extra view, for models that declare `mode`
 
+    [review.views]                            # more named views, e.g. the variants of a design
+    plate = { mode = "plate" }
+    closed = { mode = "disk", cord_slot = false }
+
 PRINTGATE_PRINTERS="a,b" narrows the printers to those names, e.g. for one CI job per printer.
 """
 from __future__ import annotations
@@ -45,6 +49,7 @@ class Config:
     printers: tuple[Printer, ...] = ()
     source: Path | None = None
     context: dict = field(default_factory=dict)
+    views: dict = field(default_factory=dict)
 
     def printer(self, name: str) -> Printer:
         for p in self.printers:
@@ -85,11 +90,13 @@ def load(path: Path | str | None = None, cwd: Path | None = None) -> Config:
     if unknown:
         raise ValueError(f"{source}: unknown keys {', '.join(sorted(unknown))}")
     review = data.get("review", {})
-    if set(review) - {"context"}:
-        raise ValueError(f"{source}: unknown [review] keys {', '.join(sorted(set(review) - {'context'}))}")
+    if set(review) - {"context", "views"}:
+        raise ValueError(f"{source}: unknown [review] keys "
+                         f"{', '.join(sorted(set(review) - {'context', 'views'}))}")
     printers = [_printer(n, d, source.parent) for n, d in data.get("printers", {}).items()]
     if wanted := os.environ.get("PRINTGATE_PRINTERS"):
         names = [n.strip() for n in wanted.split(",") if n.strip()]
         config = Config(tuple(printers), source)
         printers = [config.printer(n) for n in names]
-    return Config(tuple(printers), source, dict(review.get("context", {})))
+    return Config(tuple(printers), source, dict(review.get("context", {})),
+                  {k: dict(v) for k, v in review.get("views", {}).items()})

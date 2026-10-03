@@ -89,3 +89,9 @@ def test_a_part_too_big_for_a_printer_is_not_sliced_for_it(openscad, tmp_path, m
     r = review(MODEL, tmp_path, TrimeshAnalyzer(), printers=(tiny,))
     assert [f.label for f in r.findings if f.check == "bed-fit"] == ["tiny/bed-fit"]
     assert not any(k.startswith("tiny:") for k in r.metrics)
+
+
+def test_views_render_for_models_that_declare_their_parameters(openscad, tmp_path):
+    r = review(MODEL, tmp_path, TrimeshAnalyzer(),
+               views={"narrow": {"width": 5}, "other": {"mode": "plate"}})
+    assert [i.caption for i in r.images if i.name.startswith("view-")] == ["narrow"]

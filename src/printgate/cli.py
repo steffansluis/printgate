@@ -99,7 +99,8 @@ def main(argv=None) -> int:
                 base = a.base_root / model if a.base_root else None
                 reports.append(review(model, a.out / model.stem, analyzer, base=base,
                                       profile=profile, printers=cfg.printers, differ=differ,
-                                      context=cfg.context | _context(a.context), subject=str(model)))
+                                      context=cfg.context | _context(a.context), views=cfg.views,
+                                      subject=str(model)))
             cls = plugins.load("printgate.reporters", a.format or "markdown")
             offered = {"asset_url": a.asset_url, "footer": openscad.version()}
             accepted = inspect.signature(cls).parameters

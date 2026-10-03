@@ -53,3 +53,10 @@ def test_review_context(tmp_path, monkeypatch):
     monkeypatch.delenv("PRINTGATE_CONFIG", raising=False)
     (tmp_path / "printgate.toml").write_text('[review]\ncontext = { mode = "assembly" }\n')
     assert config.load(cwd=tmp_path).context == {"mode": "assembly"}
+
+
+def test_review_views(tmp_path, monkeypatch):
+    monkeypatch.delenv("PRINTGATE_CONFIG", raising=False)
+    (tmp_path / "printgate.toml").write_text(
+        '[review.views]\nplate = { mode = "plate" }\nnarrow = { width = 5 }\n')
+    assert config.load(cwd=tmp_path).views == {"plate": {"mode": "plate"}, "narrow": {"width": 5}}

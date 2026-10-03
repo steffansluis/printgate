@@ -46,6 +46,15 @@ Settings one model needs (a material, solid infill) travel with it as `<model>.<
 beside the model, e.g. `bracket.prusaslicer.ini`, loaded after the printer's slicer config and
 shown in the review.
 
+Named views show a design's variants side by side, each rendered for every model that
+declares all of its parameters:
+
+```toml
+[review.views]
+plate = { mode = "plate" }
+closed = { mode = "disk", cord_slot = false }
+```
+
 `PRINTGATE_PRINTERS=a,b` narrows a run to those printers; `printgate config` shows what is in
 effect. `printgate gcode --printer my-printer` judges against that printer's profile, and
 `--profile file.toml` takes a bare profile instead.
