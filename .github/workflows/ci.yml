@@ -1,0 +1,29 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python: ['3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      # The distro OpenSCAD (2021.01) has no manifold backend and drops colours in full renders.
+      - name: OpenSCAD
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb fonts-dejavu-core libegl1 libopengl0 libglu1-mesa > /dev/null
+          curl -sLo /tmp/openscad.AppImage \
+            https://files.openscad.org/snapshots/OpenSCAD-2026.10.02-x86_64.AppImage
+          chmod +x /tmp/openscad.AppImage
+          cd /tmp && ./openscad.AppImage --appimage-extract > /dev/null
+          echo "PRINTGATE_OPENSCAD=xvfb-run -a /tmp/squashfs-root/AppRun" >> "$GITHUB_ENV"
+      - run: pip install -e ".[mesh,test]"
+      - run: pytest -q

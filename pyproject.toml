@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "printgate"
+version = "0.1.0.dev0"
+description = "Checks for 3D-print models and G-code before they reach a printer"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Steffan Sluis" }]
+keywords = ["3d-printing", "gcode", "openscad", "ci", "linting"]
+urls = { Source = "https://github.com/steffansluis/printgate" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Graphics :: 3D Modeling",
+]
+dependencies = []
+
+[project.optional-dependencies]
+mesh = ["trimesh>=4", "numpy"]
+test = ["pytest>=8"]
+
+[project.scripts]
+printgate = "printgate.cli:main"
+
+[project.entry-points.pytest11]
+printgate = "printgate.scad.pytest_plugin"
+
+# Adapters register here; a third-party package adds its own the same way.
+[project.entry-points."printgate.adapters"]
+trimesh = "printgate.adapters.trimesh_mesh:TrimeshAnalyzer"
+prusaslicer = "printgate.adapters.prusaslicer:PrusaSlicer"
+argus = "printgate.adapters.argus:ArgusDiffer"
+
+[project.entry-points."printgate.reporters"]
+markdown = "printgate.reporters.markdown:MarkdownReporter"
+text = "printgate.reporters.text:TextReporter"
+json = "printgate.reporters.json:JsonReporter"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
